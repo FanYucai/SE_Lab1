@@ -1,5 +1,6 @@
 import java.util.*;
 import java.util.regex.*;
+import java.beans.beancontext.*;
 
 class feifeicaicai {
 	static String exp = "";
@@ -11,6 +12,7 @@ class feifeicaicai {
 	static Pattern derPattern = Pattern.compile("^!d/d[a-zA-Z]+$");
 	static Pattern plusSplit = Pattern.compile("[+]");
 	static Pattern mulSplit = Pattern.compile("[*]");
+	static Pattern bracketsPattern = Pattern.compile("\\([a-zA-Z0-9*+-^]+\\)");
 	
 	static String[] symbols = new String[100];
 	static String[] elements = new String[100];
@@ -65,7 +67,7 @@ class feifeicaicai {
 		for (int i=0;i<plusAnsSplit.length;i++)
 			if (isNumeric(plusAnsSplit[i])){
 				flag=true;
-				System.out.println(plusAnsSplit[0]+"aaa");
+//				System.out.println(plusAnsSplit[0]+"aaa");
 				plusAns=plusAns+Integer.parseInt(plusAnsSplit[i]);
 			}
 			else {
@@ -105,6 +107,27 @@ class feifeicaicai {
 		}
 		return count;
 	} 
+	
+	public static String mergeWithBrackets(String exp) {
+		String resultStr = "";
+		resultStr = merge(exp.substring(1, exp.length()-1));
+		System.out.println("qwq: "+resultStr);
+		return resultStr;
+	}
+	
+	public static String mergeBrackets(String exp) {
+		String resultStr = "";
+		while(true) {
+			Matcher bracketsMatcher = bracketsPattern.matcher(exp);
+			if(bracketsMatcher.find()) {
+				exp = exp.replace(bracketsMatcher.group(0), 
+				mergeWithBrackets(bracketsMatcher.group(0)));
+				System.out.println(exp);
+			} else 
+				break;
+		}
+		return resultStr = exp;
+	}
 	
 	public static int derivative(String exp, String cmd) {
 		String tarVar = cmd.substring(4);
@@ -154,6 +177,9 @@ class feifeicaicai {
 				System.out.println("Shit!");
 			} else if(input.charAt(0) != '!') {
 				exp = input;
+//				System.out.println("");
+				exp = mergeBrackets(exp);
+				System.out.println("等登等登" + exp);
 				System.out.println(merge(exp));
 			} else {
 				if(exp.isEmpty()) {
