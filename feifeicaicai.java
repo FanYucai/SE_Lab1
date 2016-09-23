@@ -28,30 +28,6 @@ class feifeicaicai {
 		return true;
 	}
 	
-	
-	public static void expression(String exp) { 
-		int symCnt = 0, itmCnt = 0;
-		String tmpVar = new String();
-		
-		tmpVar = "";
-		for(int i=0; i<exp.length(); i++) {
-			if(exp.charAt(i) != '*' && exp.charAt(i) != '+') {
-				tmpVar += String.valueOf(exp.charAt(i));
-			} else {
-				symbols[itmCnt++] = String.valueOf(exp.charAt(i));
-				elements[symCnt++] = tmpVar;
-				tmpVar = "";			
-			}
-		}
-		elements[symCnt++] = tmpVar;
-//		for(int i=0; symbols[i] != null; i++) {
-//			System.out.println(symbols[i]);
-//		}
-//		for(int i=0; elements[i] != null; i++) {
-//			System.out.println(elements[i]);
-//		}
-	}
-	
 	public static String merge(String simplifiedExp) {
 		String outAns="";
 		splitByPlus = plusSplit.split(simplifiedExp);
@@ -104,7 +80,6 @@ class feifeicaicai {
 			outAns=String.valueOf(plusAns);
 		
 		return outAns;
-//		System.out.println(outAns);
 	}
 	
 	public static int simplify(String exp, String cmd) {
@@ -179,7 +154,6 @@ class feifeicaicai {
 				System.out.println("Shit!");
 			} else if(input.charAt(0) != '!') {
 				exp = input;
-//				expression(exp); 					// Return two String arrays;
 				System.out.println(merge(exp));
 			} else {
 				if(exp.isEmpty()) {
@@ -188,13 +162,13 @@ class feifeicaicai {
 				}
 				cmd = input;
 				if(simMatcher.matches()) {
-					if(simplify(exp, cmd) == -1) {
+					if(simplify(exp, cmd) == -1) 
 						System.out.println("Error! No variable: ");
-					}
+				
 				} else if(derMatcher.matches()) {
-					if(derivative(exp, cmd) == -1) {
+					if(derivative(exp, cmd) == -1) 
 						System.out.println("Error! No vartiable.");
-					}
+					
 				} else {
 					System.out.println("command not found: " + cmd);
 				}				
