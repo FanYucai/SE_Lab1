@@ -12,7 +12,9 @@ class feifeicaicai {
 	static Pattern derPattern = Pattern.compile("^!d/d[a-zA-Z]+$");
 	static Pattern plusSplit = Pattern.compile("[+]");
 	static Pattern mulSplit = Pattern.compile("[*]");
-	static Pattern bracketsPattern = Pattern.compile("\\([a-zA-Z0-9*+-^]+\\)");
+	static Pattern bracketsPattern = Pattern.compile("([a-zA-Z0-9]+\\*)*\\([a-zA-Z0-9*+-^]+\\)(\\*[a-zA-Z0-9]+)*");
+	static Pattern naiveBrPattern = Pattern.compile("\\([a-zA-Z0-9*+-^]+\\)");
+	
 	
 	static String[] symbols = new String[100];
 	static String[] elements = new String[100];
@@ -134,28 +136,37 @@ class feifeicaicai {
 		return count;
 	} 
 	
+	public static String fraction(String para, String inBrackets) {
+		String resultStr = "";
+		String[] elements = plusSplit.split(inBrackets);
+		for(int i=0; i<elements.length-1; i++) {
+			resultStr += para + "*" + elements[elements.length-1] + "+";
+		}
+		resultStr += para + "*" + elements[elements.length-1];
+		return resultStr;
+	}
+	
 	public static String deleteBrackets(String exp) {
 		String resultStr = "";
-		Matcher mulForExp = mulSplit.matcher(exp);
-		Matcher plusForExp = plusSplit.matcher(exp);
+		Matcher naiveBrMatcher = naiveBrPattern.matcher(exp);
+		resultStr = naiveBrMatcher.group(0);
 		
-		if(plusForExp.find() || mulForExp.find()) {
-			resultStr = "(" + merge(exp.substring(1, exp.length()-1)) + ")";
-//			resultStr = "X" + Md5(merge(exp.substring(1, exp.length()-1)));
-//			map.put(resultStr, merge(exp.substring(1, exp.length()-1)));			
-		}
-		else
-			resultStr = merge(exp.substring(1, exp.length()-1));
-		
+//		Matcher plusForExp = plusSplit.matcher(exp);
+		exp = exp.replaceAll("\\([a-zA-Z0-9*+-^]+\\)", "1");
+		exp = merge(exp);
+		resultStr = merge(resultStr.substring(1, exp.length()-1));
+		resultStr = fraction(exp, resultStr);
 		System.out.println("after deletion: " + resultStr);
 		return resultStr;
 	}
 	
 	public static String mergeBrackets(String exp) {
 		String resultStr = "";
+//		Matcher bracketsMatcher = bracketsPattern.matcher(exp);
 		while(true) {
 			Matcher bracketsMatcher = bracketsPattern.matcher(exp);
 			if(bracketsMatcher.find()) {
+				System.out.println("aha " + bracketsMatcher.group(0));
 				exp = exp.replace(bracketsMatcher.group(0), 
 				deleteBrackets(bracketsMatcher.group(0)));
 				System.out.println(exp);
