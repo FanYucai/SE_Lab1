@@ -1,6 +1,6 @@
 import java.util.*;
 import java.util.regex.*;
-import java.beans.beancontext.*;
+import java.security.MessageDigest;
 
 class feifeicaicai {
 	static String exp = "";
@@ -20,7 +20,7 @@ class feifeicaicai {
 	static String[] elementsOut = new String[100];
 	static String[] splitByPlus;
 	static String[] splitByMul;
-	static Map map = new HashMap();
+	static HashMap<String, String> map = new HashMap<String, String>();
 	
 	
 	public static boolean isNumeric(String str){
@@ -84,6 +84,32 @@ class feifeicaicai {
 		return outAns;
 	}
 	
+//	public static String Md5(String s) {
+//		char hexDigits[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};       
+//		try {
+//			byte[] btInput = s.getBytes();
+//			// 获得MD5摘要算法的 MessageDigest 对象
+//			MessageDigest mdInst = MessageDigest.getInstance("MD5");
+//			// 使用指定的字节更新摘要
+//			mdInst.update(btInput);
+//			// 获得密文
+//			byte[] md = mdInst.digest();
+//			// 把密文转换成十六进制的字符串形式
+//			int j = md.length;
+//			char str[] = new char[j * 2];
+//			int k = 0;
+//			for (int i = 0; i < j; i++) {
+//				byte byte0 = md[i];
+//				str[k++] = hexDigits[byte0 >>> 4 & 0xf];
+//				str[k++] = hexDigits[byte0 & 0xf];
+//			}
+//			return new String(str);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
+	
 	public static int simplify(String exp, String cmd) {
 		String simplifiedExp=exp;
 		String[] strs = simSplit.split(cmd);
@@ -108,10 +134,20 @@ class feifeicaicai {
 		return count;
 	} 
 	
-	public static String mergeWithBrackets(String exp) {
+	public static String deleteBrackets(String exp) {
 		String resultStr = "";
-		resultStr = merge(exp.substring(1, exp.length()-1));
-		System.out.println("qwq: "+resultStr);
+		Matcher mulForExp = mulSplit.matcher(exp);
+		Matcher plusForExp = plusSplit.matcher(exp);
+		
+		if(plusForExp.find() || mulForExp.find()) {
+			resultStr = "(" + merge(exp.substring(1, exp.length()-1)) + ")";
+//			resultStr = "X" + Md5(merge(exp.substring(1, exp.length()-1)));
+//			map.put(resultStr, merge(exp.substring(1, exp.length()-1)));			
+		}
+		else
+			resultStr = merge(exp.substring(1, exp.length()-1));
+		
+		System.out.println("after deletion: " + resultStr);
 		return resultStr;
 	}
 	
@@ -121,7 +157,7 @@ class feifeicaicai {
 			Matcher bracketsMatcher = bracketsPattern.matcher(exp);
 			if(bracketsMatcher.find()) {
 				exp = exp.replace(bracketsMatcher.group(0), 
-				mergeWithBrackets(bracketsMatcher.group(0)));
+				deleteBrackets(bracketsMatcher.group(0)));
 				System.out.println(exp);
 			} else 
 				break;
@@ -181,6 +217,10 @@ class feifeicaicai {
 				exp = mergeBrackets(exp);
 				System.out.println("等登等登" + exp);
 				System.out.println(merge(exp));
+				
+				for(Map.Entry<String, String> entry:map.entrySet()){    
+					 System.out.println(entry.getKey()+"--->"+entry.getValue());    
+				}   
 			} else {
 				if(exp.isEmpty()) {
 					System.out.println("No expressions available!");
