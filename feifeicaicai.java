@@ -6,11 +6,13 @@ class feifeicaicai {
 	static String exp = "";
 	static String input = "";
 	static String cmd = "";
+	static String errStr = "";
 	
 	static Pattern simPattern = Pattern.compile("^!simplify ([a-zA-Z]+=[0-9]+[\\s]*)+$");
 	static Pattern simSpecPattern = Pattern.compile("^!simplify\\s*$");
 	static Pattern simSplit = Pattern.compile("[\\s=]+");
-	static Pattern derPattern = Pattern.compile("^!d/d[a-zA-Z]+$");
+	static Pattern simErrorPattern = Pattern.compile("(=[a-zA-Z0-9]+=)");
+	static Pattern derPattern = Pattern.compile("^!d/d [a-zA-Z]+$");
 	static Pattern plusSplit = Pattern.compile("[+]");
 	static Pattern mulSplit = Pattern.compile("[*]");
 	static Pattern bracketsPattern = Pattern.compile("([a-zA-Z0-9]+\\*)*\\([a-zA-Z0-9*+-]+\\){1}(\\*[a-zA-Z0-9]+)*");
@@ -29,10 +31,6 @@ class feifeicaicai {
 		int [] cnt = new int [1000];
 		int [] pos = new int [1000];
 		int p=0;
-		
-//		for (int i=0;i<strsLen;i++)
-//			System.out.println(strs[i] + "-->" + String.valueOf(num[i]) );
-//		System.out.println("Len = " + strsLen);
 		
 		for (int i=0;i<strsLen;i++){ 
 			int x=Math.abs(strs[i].hashCode())%953;
@@ -95,16 +93,7 @@ class feifeicaicai {
 			if(charMatcher.find())
 				charMul[charMulCnt++] = charMatcher.group(0);
 				//System.out.println("qwq "+charMatcher.group(0));
-		}
-		
-//			System.out.println("Offset = " + offset_HAHAHA);
-//			for(int i=0; charMul[i] != null; i++) {
-//				System.out.println("qwq: " + charMul[i]);
-//			}
-//			for(int i=0; digitMul[i] != null; i++) {
-//				System.out.println("qqq: " + digitMul[i]);
-//			}
-//		
+		}		
 		int[] nums = new int[1000];
 
 		for(int i=0; i<digitMulCnt; i++) {
@@ -137,7 +126,7 @@ class feifeicaicai {
 					outTmp=outTmp+"*"+splitByMul[j];
 				}
 			}
-			if (mulsAns==1&&!flag) 
+			if ((mulsAns==1&&!flag)||(mulsAns==1&&flag&&flagVar)) 
 				outTmp=outTmp.substring(1, outTmp.length());
 			else if (mulsAns==0)
 				outTmp="";
@@ -183,13 +172,6 @@ class feifeicaicai {
 		return true;
 	}
 	
-	public static String unfoldBrPower(String exp){
-		String resultStr = "";
-		Pattern powerBrPattern = Pattern.compile("\\([0-9a-zA-Z]\\)\\^[0-9]+");
-		
-		return resultStr;
-	}
-	
 	public static String digitCharSplit(String exp) {
 		Pattern pattern = Pattern.compile("[0-9]+[a-zA-Z]+");
 		Pattern numericPattern = Pattern.compile("[0-9]+");
@@ -203,9 +185,7 @@ class feifeicaicai {
 			if(numericMatcher.find()) {
 				String charStr = tempStr;
 				String numericStr = numericMatcher.group(0);
-//				System.out.println(numericStr);
 				charStr = charStr.replace(numericStr, "");
-//				System.out.println(charStr);	
 				String resultStr = numericStr + "*" + charStr;
 				exp = exp.replace(tempStr, resultStr);			}
 		}
@@ -218,14 +198,12 @@ class feifeicaicai {
 		String powerStr;
 		int powerCnt = 0, leftStack = 1, rightIndex = 0, leftIndex = 0;
 		Pattern specBrPattern = Pattern.compile("\\)\\^");
-//		Matcher specMatcher = specPattern.matcher(exp);
 		int index = exp.indexOf(")^");
 		rightIndex = index+2;
 		leftIndex = index-1;
 		leftStack = 1;
-		while(rightIndex < exp.length() && Character.isDigit(exp.charAt(rightIndex))) {
+		while(rightIndex < exp.length() && Character.isDigit(exp.charAt(rightIndex)))
 			rightIndex++;
-		}
 		
 		while(leftIndex >= 0 && leftStack != 0) {
 			if(exp.charAt(leftIndex) == ')')
@@ -235,23 +213,18 @@ class feifeicaicai {
 			leftIndex--;
 			//System.out.println("index = " + String.valueOf(leftStack));
 		}
-		
 		totBrPower = exp.substring(leftIndex+1, rightIndex);
-		
-		System.out.println("totBrPower" + totBrPower);
-		
-		powerStr = totBrPower.split("\\^")[1];
-		inBr = totBrPower.split("\\^")[0];
+		index = totBrPower.indexOf(")^");
+//		System.out.println("totBrPower" + totBrPower);
+//		System.out.println("Index = " + index);
+		powerStr = totBrPower.substring(index+2, totBrPower.length());
+		inBr = totBrPower.substring(0, index+1);
 		powerCnt = Integer.parseInt(powerStr); 
 		
-		for(int i=0; i<powerCnt-1; i++) {
+		for(int i=0; i<powerCnt-1; i++) 
 			res += inBr + "*";
-		}
 		res += inBr;
-		
 		exp = exp.replace(totBrPower, res);
-		System.out.println("res="+exp);
-	
 		if(specBrPattern.matcher(exp).find()) 
 			exp = specBrPower(exp);
 		return exp;
@@ -262,6 +235,7 @@ class feifeicaicai {
 		Matcher matcher  = pattern.matcher(exp);
 		Pattern specPattern = Pattern.compile("\\)\\^");
 		Matcher specMatcher = specPattern.matcher(exp);
+		
 		if(specMatcher.find()) 
 			exp = specBrPower(exp);
 		
@@ -270,7 +244,6 @@ class feifeicaicai {
 			String tempStr = matcher.group(0);
 			String[] result = tempStr.split("[\\s]*[\\^]+[\\s]*");
 			//System.out.println(result[0]);
-			//int p=1;
 			int p=Integer.parseInt(result[1]);
 			String rep=result[0];
 			for (int i=1;i<p;i++)
@@ -278,6 +251,7 @@ class feifeicaicai {
 			//System.out.println(rep);
 			exp=exp.replace(tempStr, rep);
 		}
+//		System.out.println("After handle Index: " + exp);
 		return exp;
 	}
 	
@@ -285,17 +259,13 @@ class feifeicaicai {
 		String simplifiedExp=exp;
 		String[] strs = simSplit.split(cmd);
 		for(int i=1; i<strs.length; ) {
-//			if((simplifiedExp = simplifiedExp.replaceAll(strs[i++], strs[i++])) != exp) {
-//				
-////				System.out.println("qweqweqw"+simplifiedExp);
-//			} else {
-//				System.out.println("Existing unavailable syntax.");
-//				return -1;
-//			}
-			if((simplifiedExp = simplifiedExp.replaceAll(strs[i++], strs[i++])) == exp) 
+			String pre = simplifiedExp;
+			if((simplifiedExp = simplifiedExp.replaceAll(strs[i++], strs[i++])) == pre) {
 				System.out.println("Existing unavailable syntax."); 
+				return -1;
+			}
 		}
-		System.out.println(merge(simplifiedExp));		
+		System.out.println(addPower(merge(simplifiedExp)));		
 		return 0;
 	}	
 	
@@ -316,7 +286,6 @@ class feifeicaicai {
 		naiveBrMatcher.find();
 		resultStr = naiveBrMatcher.group(0);
 //		System.out.println("括号里面的内容：" + resultStr);
-//		Matcher plusForExp = plusSplit.matcher(exp);
 		exp = exp.replaceAll("\\([a-zA-Z0-9*+-^]+\\)", "1");
 		exp = merge(exp);
 //		System.out.println("括号之外的系数：" + exp);
@@ -334,7 +303,6 @@ class feifeicaicai {
 			if(bracketsMatcher.find()) {
 				exp = exp.replace(bracketsMatcher.group(0), 
 				deleteBrackets(bracketsMatcher.group(0)));
-				//System.out.println(exp);
 			} else 
 				break;
 		}
@@ -342,7 +310,6 @@ class feifeicaicai {
 	}
 	
 	public static String mergeSpecBrackets(String exp) {
-		//System.out.println("xxx: "+exp);
 		String resultStr = "";
 		int index = exp.indexOf(")*(");
 
@@ -369,9 +336,6 @@ class feifeicaicai {
 		String[] firstSplit = new String[1000];
 //		System.out.println("HandleExp = " + handleExp);
 		int index2 = handleExp.indexOf(")*(");
-//		for(int i=0; i<handleExp; i++) {
-//			
-//		}
 		firstBr = handleExp.substring(1, index2);
 		secondBr = handleExp.substring(index2+2);
 		
@@ -387,7 +351,6 @@ class feifeicaicai {
 		for(int i=0; i<tempFirstBr.length(); i++) {
 			//System.out.println("tempFirstBr[i] = " + tempFirstBr.charAt(i));
 			if(rightStack == 0 && tempFirstBr.charAt(i) == '+') {
-//				plusIndex = i;
 				firstSplit[firstSplitCnt++] = tempFirstBr.substring(0, i);
 				tempFirstBr = tempFirstBr.substring(i+1); // after '+';
 				i = 0;
@@ -426,16 +389,53 @@ class feifeicaicai {
 	public static int countPower(String expFrag, String tarVar) {
 		int count = 0;
 		int index = 0;
-		while ((index = expFrag.indexOf(tarVar,index)) != -1) {
-			expFrag = expFrag.substring(index + tarVar.length());
+
+		String pStr = tarVar.replace("*", "\\*");
+		pStr = "[^a-zA-Z*]*"+pStr+"[^a-zA-Z*]*";
+		Pattern p = Pattern.compile(pStr);
+		Matcher m = p.matcher(expFrag);
+		while (m.find()) {
 			count++;
-			index = 0;
 		}
 		return count;
 	} 
+	
+	public static String addPower(String originexp) {
+		String exp = originexp;
+		String derivedExp = "";
+		splitByPlus = plusSplit.split(exp);
+		
+		for(int i=0; i<splitByPlus.length; i++) {
+			String tempStr = splitByPlus[i];
+			String tempVar = "";
+			//System.out.println(splitByPlus[i]);
+			splitByMul = mulSplit.split(splitByPlus[i]);
+			for(int j=splitByMul.length-1; j>=0; j--) {
+				String tarVar = splitByMul[j];
+			
+				if(tempVar.equals(tarVar)) 
+					continue;
+				int cnt = countPower(splitByPlus[i], tarVar);
+				if(cnt > 1) {
+					Pattern pattern = Pattern.compile("("+tarVar+"\\*)*"+tarVar);
+					Matcher matcher = pattern.matcher(tempStr);
+					String patternStr = "";
+					if(matcher.find()) {
+						patternStr = matcher.group(0);
+						patternStr = patternStr.replace("*", "\\*");
+					}
+					tempStr = tempStr.replaceAll("[^a-zA-Z*]*"+patternStr+"[^a-zA-Z*]*", tarVar+"^"+String.valueOf(cnt));
+					tempVar = tarVar;
+				}
+			}
+			exp = exp.replace(splitByPlus[i], tempStr);
+		}
+//		System.out.println("exp = " + exp);
+		return exp;
+	}
 
 	public static int derivative(String exp, String cmd) {
-		String tarVar = cmd.substring(4);
+		String tarVar = cmd.substring(5);
 		String derivedExp = "";
 		splitByPlus = plusSplit.split(exp);
 		
@@ -443,13 +443,9 @@ class feifeicaicai {
 			System.out.println("Error! No variable!");
 			return -1;
 		}
-		
 		for(int i=0; i<splitByPlus.length; i++) {
 			String tempStr = "";
-			//System.out.println(splitByPlus[i]);
 			int cnt = countPower(splitByPlus[i], tarVar);
-//			System.out.println("cnt = " + cnt + "for: " + splitByPlus[i] + "-->"+ tarVar);
-
 			if(cnt == 0) {
 				tempStr = "0";
 			} else {
@@ -463,12 +459,69 @@ class feifeicaicai {
 			else
 				derivedExp = derivedExp + "+" + tempStr;
 		}
-		System.out.println(merge(derivedExp));
+		String showExp = addPower(merge(derivedExp));
+		System.out.println(showExp);
 		return 0;
 	} 
 	
-	public static String init(String exp) {
+	public static int ifWrong(String exp) {
+		Pattern pattern0 = Pattern.compile("[^a-zA-Z0-9+*()\\^\\s]");
+		Pattern pattern1 = Pattern.compile("\\)");
+		Pattern pattern2 = Pattern.compile("\\(");
+		Pattern pattern3 = Pattern.compile("\\(\\s*\\)");
+		Pattern pattern4 = Pattern.compile("[^a-zA-Z0-9\\)]+\\+");
+		Pattern pattern5 = Pattern.compile("[^a-zA-Z0-9\\)]+\\*");
+		Pattern pattern6 = Pattern.compile("[^a-zA-Z\\)]+\\^");
+		Pattern pattern7 = Pattern.compile("[^\\+\\*\\(]+\\(");
+		Pattern pattern8 = Pattern.compile("[^a-zA-Z0-9\\)]+\\)");
+		Pattern pattern88 = Pattern.compile("^[^0-9a-zA-Z\\(]+");
+		Pattern pattern99 = Pattern.compile("[^0-9a-zA-Z\\)]+$");
+		
+		Matcher matcher0 = pattern0.matcher(exp);
+		Matcher matcher1 = pattern1.matcher(exp);
+		Matcher matcher2 = pattern2.matcher(exp);
+		Matcher matcher3 = pattern3.matcher(exp);
+		Matcher matcher4 = pattern4.matcher(exp);
+		Matcher matcher5 = pattern5.matcher(exp);
+		Matcher matcher6 = pattern6.matcher(exp);
+		Matcher matcher7 = pattern7.matcher(exp);
+		Matcher matcher8 = pattern8.matcher(exp);
+		Matcher matcher88 = pattern88.matcher(exp);
+		Matcher matcher99 = pattern99.matcher(exp);
+		
+		if(matcher0.find()) {
+			System.out.println("Illegal character(s)!");
+			return -1;
+		}
+		int leftCnt = 0, rightCnt = 0;
+		while(matcher1.find()) rightCnt++;
+		while(matcher2.find()) leftCnt++;
+		if(leftCnt != rightCnt) {
+			System.out.println("No matched brackets pattern.");
+			return -1;
+		}
+		if(exp.indexOf("(") > exp.indexOf(")")) {
+			System.out.println("No matched brackets pattern.");
+			return -1;
+		}
+		if(matcher4.find() || matcher5.find() || matcher6.find() || matcher7.find() || matcher8.find()) {
+			System.out.println("No correct expressions.");
+			return -1;
+		}
+		if(matcher88.find() || matcher99.find()) {
+			System.out.println("No correct expressions.");
+			return -1;
+		}
+		return 0;	
+	}
 	
+	public static String init(String exp) {
+		if(exp.isEmpty())
+			return "";
+		if(ifWrong(exp) == -1) 
+			return "";
+		
+		exp = digitCharSplit(exp);
 		exp = dealIndex(exp);
 		
 		if(specBrPattern.matcher(exp).find()) 
@@ -476,8 +529,16 @@ class feifeicaicai {
 		else if(naiveBrPattern.matcher(exp).find())
 			exp = mergeBrackets(exp);
 		
-		exp = digitCharSplit(exp);
 		exp = merge(exp);
+		
+		
+		if(exp.isEmpty())
+			System.out.println("Error!");
+		else {
+			String showExp = addPower(exp);
+			System.out.println(showExp);
+		}
+		
 		return exp;
 	}
 	
@@ -493,15 +554,15 @@ class feifeicaicai {
 			Matcher simMatcher = simPattern.matcher(input);
 			Matcher derMatcher = derPattern.matcher(input);
 			Matcher simSecMatcher = simSpecPattern.matcher(input);
+			Matcher simErrorMatcher = simErrorPattern.matcher(input);
 			if(input.isEmpty()) {
 				System.out.println("Shit!");
 			} else if(input.charAt(0) != '!') {
 				exp = input;
 				exp = exp.replaceAll("\\s", "");
+				//System.out.println("exp = "  +exp);
 				Matcher specBrMatcher = specBrPattern.matcher(exp);
-
 				exp = init(exp);
-				System.out.println(merge(exp));
 			} else {
 				if(exp.isEmpty()) {
 					System.out.println("No expressions available!");
@@ -509,14 +570,16 @@ class feifeicaicai {
 				}
 				cmd = input;
 				if(simSecMatcher.matches()) {
-					System.out.println(exp);
+					System.out.println(addPower(exp));
+				} else if(simErrorMatcher.find()) {
+					System.out.println("Please add spaces in right places.");
+					continue;
 				} else if(simMatcher.matches()) {
 					if(simplify(exp, cmd) == -1) 
-						System.out.println("Error! No variable: ");
+						continue;
 				} else if(derMatcher.matches()) {
 					if(derivative(exp, cmd) == -1) 
-						System.out.println("Error! No vartiable.");
-					
+						continue;
 				} else {
 					System.out.println("command not found: " + cmd);
 				}				
